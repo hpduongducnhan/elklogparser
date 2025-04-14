@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "./"
+    },
+    {
+      "name": "bego",
+      "path": "./bego"
+    },
+    {
+      "name": "bepy",
+      "path": "./bepy"
+    },
+    {
+      "name": "fere",
+      "path": "./fere"
+    }
+  ],
+  "settings": {
+    "files.exclude": {},
+  }
+}

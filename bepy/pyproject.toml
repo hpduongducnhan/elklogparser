@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "bepy"
+version = "0.1.0"
+description = ""
+authors = ["NhanDD3 <nhandd3@fpt.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^5.2"
+djangorestframework = "^3.16.0"
+pydantic = "^2.11.1"
+pydantic-settings = "^2.8.1"
+psycopg2 = "^2.9.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
