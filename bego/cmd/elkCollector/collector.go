@@ -129,7 +129,13 @@ func (e *ElkCollector) Info() string {
 
 func (e *ElkCollector) collectWithQuery(query ElkQuery) error {
 	builtQuery := elkQueryBuilder.Build(query.Code, query.Query, e)
-	return elkclient.ScrollLogWithCode(e.Code, query.Code, e.ElkClient, query.Index, builtQuery, elkInnerHitChan)
+	if builtQuery == "" {
+		log.Error().Str("code", e.Code).Str("query", query.Code).Msg("Failed to build query")
+		return fmt.Errorf("failed to build query for %s", query.Code)
+	}
+	res := elkclient.ScrollLogWithCode(e.Code, query.Code, e.ElkClient, query.Index, builtQuery, elkRespChan)
+	// log.Info().Str("code", e.Code).Str("query", query.Code).Msg("Collecting log with query")
+	return res
 }
 
 func (e *ElkCollector) AllowToRun() bool {
@@ -177,6 +183,7 @@ func (e *ElkCollector) ReloadLastRunAt() error {
 }
 
 func (e *ElkCollector) Shutdown() error {
-	elkclient.CloseClientWithScrolls(e.ElkClient)
+	// log.Info().Str("code", e.Code).Msg("Shutting down ElkCollector")
+	// elkclient.CloseClientWithScrolls(e.ElkClient)
 	return nil
 }

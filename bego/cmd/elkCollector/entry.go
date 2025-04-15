@@ -1,125 +1,70 @@
 package elkcollector
 
 import (
-	"fmt"
-	"os"
-	"runtime/pprof"
-
 	"github.com/rs/zerolog/log"
 )
 
-func listRunningGoroutines() {
-	// Lấy profile của tất cả goroutine
-	profile := pprof.Lookup("goroutine")
-	if profile == nil {
-		fmt.Println("Cannot lookup goroutine profile")
-		return
-	}
-
-	// In thông tin goroutine ra stdout
-	fmt.Println("List of running goroutines:")
-	profile.WriteTo(os.Stdout, 1)
-}
-
-func waitForTerminate(wait bool) {
-	if wait {
-		<-terminateSigChan
-	}
-	log.Info().Msg("Received termination signal, shutting down...")
-
-	// terminate context
-	terminateFunc()
-	// waiit for all goroutines to finish
-	terminateWaitGroup.Wait()
-	log.Info().Msg("waitgroup finished")
-
-	// Close the scheduler
-	close(elkInnerHitChan)
-
-	// close the collectors
-	for _, collector := range elkCollectors {
-		if collector != nil {
-			collector.Shutdown()
-		}
-	}
-
-	// Close the Redis client
-	if rClient != nil {
-		err = rClient.Close()
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to close Redis client")
-		}
-	}
-
-	for _, collector := range elkCollectors {
-		if collector != nil {
-			collector.Shutdown()
-		}
-	}
-
-	log.Info().Msg("Closed everything, bye bye!")
-}
-
-func loadDatabases() {
-	if elkCollectors == nil {
-		elkCollectors = make(map[string]*ElkCollector)
-	}
-	// load from databases
-	activeConfigs, err := pgRepo.GetActiveConfigsWithRelations()
-	if err != nil {
-		log.Error().Err(err).Msg("Error getting active configs")
-		return
-	}
-
-	for _, config := range activeConfigs {
-		elkCollectors[config.Code] = NewElkCollectorFromDbConf(config)
-	}
-	return
-}
-
-func handleLogResponses(wid int) {
-	// log.Info().Int("wid", wid).Msgf("Starting log response handler %d", wid)
+func runHandlers(hid int) {
+	log.Info().Msgf("Starting handler %d...", hid+1)
 	for {
 		select {
-		case val, ok := <-elkInnerHitChan:
+		case <-terminationCtx.Done():
+			log.Info().Msgf("Handler %d terminated", hid+1)
+			return
+		case val, ok := <-elkRespChan:
 			if !ok {
-				terminateWaitGroup.Done()
-				log.Warn().Msg("elkInnerHitChan closed")
 				return
 			}
-			elkResponseHandler.Handle(val)
-		case <-terminateCtx.Done():
-			terminateWaitGroup.Done()
-			return
+			if val == nil {
+				log.Warn().Msg("handler get nil value, ignore!")
+				continue
+			} else {
+				err := elkRespHandler.Handle(val)
+				if err != nil {
+					log.Error().Err(err).Interface("val", val).Msgf("handler get error")
+				}
+			}
+		}
+	}
+}
+
+func runCollectors() {
+	for _, collector := range elkCollectors {
+		if collector != nil && collector.AllowToRun() {
+			terminationWg.Add(1)
+			go func() {
+				log.Info().Str("code", collector.Code).Msg("Running collectors...")
+				collector.CollectLog()
+				log.Info().Str("code", collector.Code).Msg("Done collectors...")
+				terminationWg.Done()
+			}()
 		}
 	}
 }
 
 func RunCollector() {
 	initialize()
-	loadDatabases()
+	loadCollectorFromDatabases()
 
 	// init handlers
-	for wid := range env.ELK_LOG_MAX_HANDLERS {
-		terminateWaitGroup.Add(1)
-		go handleLogResponses(wid)
+	for i := range env.ELK_LOG_MAX_HANDLERS {
+		terminationWg.Add(1)
+		go func() {
+			defer terminationWg.Done()
+			runHandlers(i)
+		}()
 	}
-	log.Info().Msg("Started log response handlers")
 
-	// schedule collector
-	defer scheduler.Stop()
 	for {
 		select {
-		case <-scheduler.C:
-			for _, collector := range elkCollectors {
-				if collector.AllowToRun() {
-					go collector.CollectLog()
-				}
-			}
-		case <-terminateSigChan:
-			waitForTerminate(false)
-			listRunningGoroutines()
+		case <-terminationSigChan:
+			log.Info().Msg("Received shutdown signal, shutting down...")
+			shutdown()
+			log.Info().Msg("App shutdown complete, bye bye!")
 			return
+		case <-scheduler.C:
+			// run collector
+			runCollectors()
 		}
 	}
 }

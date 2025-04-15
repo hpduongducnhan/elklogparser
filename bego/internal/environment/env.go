@@ -14,12 +14,13 @@ type EnvConfig struct {
 	WEB_APP_CONCURRENCY int    `mapstructure:"WEB_APP_CONCURRENCY"`
 	WEB_APP_STATIC_PATH string `mapstructure:"WEB_APP_STATIC_PATH"`
 
-	ELK_LOG_INDEX          string   `mapstructure:"ELK_LOG_INDEX"`
-	ELK_LOG_ADDRS          []string `mapstructure:"ELK_LOG_ADDRS"`
-	ELK_LOG_AUTH_USERNAME  string   `mapstructure:"ELK_LOG_AUTH_USERNAME"`
-	ELK_LOG_AUTH_PASSWORD  string   `mapstructure:"ELK_LOG_AUTH_PASSWORD"`
-	ELK_LOG_MAX_HANDLERS   int      `mapstructure:"ELK_LOG_MAX_HANDLERS"`
-	ELK_LOG_SCHEDULE_TIMER int      `mapstructure:"ELK_LOG_SCHEDULE_TIMER"` // seconds
+	ELK_LOG_INDEX            string   `mapstructure:"ELK_LOG_INDEX"`
+	ELK_LOG_ADDRS            []string `mapstructure:"ELK_LOG_ADDRS"`
+	ELK_LOG_AUTH_USERNAME    string   `mapstructure:"ELK_LOG_AUTH_USERNAME"`
+	ELK_LOG_AUTH_PASSWORD    string   `mapstructure:"ELK_LOG_AUTH_PASSWORD"`
+	ELK_LOG_MAX_HANDLERS     int      `mapstructure:"ELK_LOG_MAX_HANDLERS"`
+	ELK_LOG_SCHEDULE_TIMER   int      `mapstructure:"ELK_LOG_SCHEDULE_TIMER"` // seconds
+	ELK_RESPONSE_BUFFER_SIZE int      `mapstructure:"ELK_RESPONSE_BUFFER_SIZE"`
 
 	SCHEDULER_TICKER int `mapstructure:"SCHEDULER_TICKER"` // seconds
 
@@ -42,6 +43,9 @@ func (e *EnvConfig) ConfigureProxy() {
 }
 
 func (e *EnvConfig) SetDefault() {
+	if e.ELK_RESPONSE_BUFFER_SIZE == 0 {
+		e.ELK_RESPONSE_BUFFER_SIZE = 1000
+	}
 	if e.SCHEDULER_TICKER == 0 {
 		e.SCHEDULER_TICKER = 30
 	}

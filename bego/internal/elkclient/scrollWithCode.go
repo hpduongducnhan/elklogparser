@@ -44,21 +44,15 @@ func ScrollLogWithCode(
 	}
 
 	scrollID = parsedResp.ScrollID
+	// log.Info().Str("scrollID", scrollID).Msg("scroll ID")
 	defer func() {
-		// log.Info().Str("scrollID", scrollID).Msg("clearing scroll")
-		if scrollID != "" {
-			_, err := elkClient.ClearScroll(
-				elkClient.ClearScroll.WithContext(context.Background()),
-				elkClient.ClearScroll.WithScrollID(scrollID),
-			)
-			if err != nil {
-				log.Error().Err(err).Msg("error clearing scroll")
-			}
+		err := ClearScroll(elkClient, scrollID)
+		if err != nil {
+			log.Error().Err(err).Msg("error clearing scroll")
 		}
 	}()
 
 	if len(parsedResp.Hits.Hits) == 0 {
-		// log.Info().Int("counter", counter).Str("scrollID", scrollID).Msg("scroll done with no hits")
 		return nil
 	}
 

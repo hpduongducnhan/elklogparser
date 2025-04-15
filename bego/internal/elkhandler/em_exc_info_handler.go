@@ -1,4 +1,4 @@
-package elkcollector
+package elkhandler
 
 import (
 	"fmt"
@@ -43,13 +43,13 @@ func (e *emExcInfoLog) Parse(hit *elkclient.ElkInnerHit) {
 	}
 }
 
-func elkRespHandleEMExcInfo(msg *elkclient.ElkResponseWithCode) error {
+func (h *ElkResponseHandler) emExcInfoHandler(msg *elkclient.ElkResponseWithCode) error {
 	// log.Info().Msgf("elkRespHandleEMExcInfo: %s", msg.Code)
 	excInfo := &emExcInfoLog{}
 	excInfo.Parse(msg.ElkInnerHit)
 	if excInfo.IsValid() {
 		// log.Info().Msgf("elkRespHandleEMExcInfo: %v", excInfo)
-		pgRepo.CreateOrUpdateElkCollectedLog(
+		h.pgRepo.CreateOrUpdateElkCollectedLog(
 			msg.CollectorCode, msg.QueryCode,
 			excInfo.LogID, excInfo.Raw, excInfo.Timestamp,
 		)

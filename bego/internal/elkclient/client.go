@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net"
+	"net/http"
 	"time"
 
+	"github.com/elastic/elastic-transport-go/v8/elastictransport"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/rs/zerolog/log"
@@ -16,20 +19,27 @@ var client *elasticsearch.Client
 
 func GetDefaultElkConfig(serverAddrs []string, authUser, authPassword string) *elasticsearch.Config {
 	return &elasticsearch.Config{
-		Addresses: serverAddrs,
-		Username:  authUser,
-		Password:  authPassword,
-		// RetryOnStatus: []int{502, 503, 504},
-		// MaxRetries:    3,
-		// Transport: &http.Transport{
-		// 	MaxIdleConns:        10,
-		// 	MaxIdleConnsPerHost: 10,
-		// 	IdleConnTimeout:     30 * time.Second,
-		// 	DialContext: (&net.Dialer{
-		// 		Timeout:   30 * time.Second,
-		// 		KeepAlive: 30 * time.Second,
-		// 	}).DialContext,
-		// },
+		Addresses:     serverAddrs,
+		Username:      authUser,
+		Password:      authPassword,
+		RetryOnStatus: []int{500, 502, 503, 504},
+		MaxRetries:    3,
+		Transport: &http.Transport{
+			MaxIdleConns:        10,
+			MaxIdleConnsPerHost: 10,
+			MaxConnsPerHost:     50,
+			IdleConnTimeout:     30 * time.Second,
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+		},
+		Logger: &elastictransport.TextLogger{
+			// Output:             os.Stderr,
+			Output:             io.Discard,
+			EnableRequestBody:  true,
+			EnableResponseBody: true,
+		},
 	}
 }
 
@@ -105,5 +115,24 @@ func CloseClientWithScrolls(elkClient *elasticsearch.Client) error {
 	// if transport, ok := elkClient.Transport.(*elastictransport.Client); ok {
 
 	// }
+	return nil
+}
+
+func ClearScroll(elkClient *elasticsearch.Client, scrollID string) error {
+	if elkClient == nil {
+		log.Warn().Msg("elkClient is nil")
+		return nil
+	}
+	if scrollID == "" {
+		log.Warn().Msg("scrollID is empty")
+		return nil
+	}
+	_, err := elkClient.ClearScroll(
+		elkClient.ClearScroll.WithContext(context.Background()),
+		elkClient.ClearScroll.WithScrollID(scrollID),
+	)
+	if err != nil {
+		return err
+	}
 	return nil
 }
