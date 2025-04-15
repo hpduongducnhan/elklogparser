@@ -6,6 +6,7 @@ from ..models import ElkCollectedLog, ElkGroupLog
 class ElkCollectedLogAdmin(admin.ModelAdmin):
     list_display = ('collector_code', 'log_id', 'log_type', 'log_timestamp', 'created_at')
     search_fields = ("collector_code", "log_id")
+    list_filter = ('collector_code', 'log_type',)
 
 
 @admin.register(ElkGroupLog)

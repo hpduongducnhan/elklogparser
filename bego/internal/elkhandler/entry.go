@@ -27,6 +27,8 @@ func (h *ElkResponseHandler) getHandlerByCode(collectorCode, queryCode string) f
 		return h.emExcInfoHandler
 	case "em-ticket-code__em-ticket-code":
 		return h.emTicketCodeHandler
+	case "em-cads-alert__em-cads-alert":
+		return h.emCadsAlertHandler
 	default:
 		return nil
 	}

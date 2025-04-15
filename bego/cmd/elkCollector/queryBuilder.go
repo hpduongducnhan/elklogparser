@@ -15,6 +15,8 @@ func (b *ElkQueryBuilder) getBuilderByCode(code string) func(code, query string,
 		return b.buildQueryCodeEmExcInfo
 	case "em-ticket-code":
 		return b.buildQueryCodeEmTicketCode
+	case "em-cads-alert":
+		return b.buildQueryCodeEmCADSAlerts
 	default:
 		return nil
 	}
@@ -32,7 +34,7 @@ func (b *ElkQueryBuilder) buildWithTimeRange(query string, elkCollector *ElkColl
 	for _, char := range []string{"\t", "\n", ""} {
 		builtQuery = strings.ReplaceAll(builtQuery, char, "")
 	}
-	log.Info().Str("fromDate", strFromDate).Str("toDate", strToDate).Str("query", query).Msg("Building query with time range")
+	// log.Info().Str("fromDate", strFromDate).Str("toDate", strToDate).Str("query", query).Msg("Building query with time range")
 	return builtQuery
 }
 
@@ -51,6 +53,11 @@ func (b *ElkQueryBuilder) buildQueryCodeEmExcInfo(code, query string, elkCollect
 }
 
 func (b *ElkQueryBuilder) buildQueryCodeEmTicketCode(code, query string, elkCollector *ElkCollector) string {
+	queryWithTimeRange := b.buildWithTimeRange(query, elkCollector)
+	return queryWithTimeRange
+}
+
+func (b *ElkQueryBuilder) buildQueryCodeEmCADSAlerts(code, query string, elkCollector *ElkCollector) string {
 	queryWithTimeRange := b.buildWithTimeRange(query, elkCollector)
 	return queryWithTimeRange
 }

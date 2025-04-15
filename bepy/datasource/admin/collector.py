@@ -4,7 +4,7 @@ from ..models import ElkCollectorConfig, ElkCollectResult
 
 @admin.register(ElkCollectorConfig)
 class ElkCollectorConfigAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'code', 'last_run_at', 'updated_at', ]
+    list_display = ['id', 'name', 'code', 'active', 'last_run_at', 'updated_at', ]
     search_fields = ["name", "code"]
     filter_horizontal = ['elk_queries', 'log_filters']
 
