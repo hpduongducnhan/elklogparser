@@ -42,12 +42,13 @@ func (e *emCadsAlertLog) Parse(hit *elkclient.ElkInnerHit) {
 }
 
 func (h *ElkResponseHandler) emCadsAlertHandler(msg *elkclient.ElkResponseWithCode) error {
-	ticketInfo := &emTicketCodeLog{}
-	ticketInfo.Parse(msg.ElkInnerHit)
-	if ticketInfo.IsValid() {
+	cadsAlert := &emCadsAlertLog{}
+	cadsAlert.Parse(msg.ElkInnerHit)
+	if cadsAlert.IsValid() {
 		h.pgRepo.CreateOrUpdateElkCollectedLog(
 			msg.CollectorCode, msg.QueryCode,
-			ticketInfo.LogID, ticketInfo.Raw, ticketInfo.Timestamp,
+			cadsAlert.LogID, cadsAlert.Alert,
+			cadsAlert.Raw, cadsAlert.Timestamp,
 		)
 	} else {
 		return fmt.Errorf("invalid log data")

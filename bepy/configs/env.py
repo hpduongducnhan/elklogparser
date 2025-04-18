@@ -130,8 +130,8 @@ class EnvSettings(BaseSettings):
         os.environ['no_proxy'] = no_proxy
 
     def get_redis_url(self) -> str:
-        self.CELERY_BROKER_URL = f'redis://{self.APP_REDIS_USER}:{self.APP_REDIS_PASSWORD}@{
-            self.APP_REDIS_HOST}:{self.APP_REDIS_PORT}/{self.APP_REDIS_DB}'
+        # self.CELERY_BROKER_URL = f'redis://{self.APP_REDIS_USER}:{self.APP_REDIS_PASSWORD}@{
+        #     self.APP_REDIS_HOST}:{self.APP_REDIS_PORT}/{self.APP_REDIS_DB}'
         return f'redis://{self.APP_REDIS_USER}:{self.APP_REDIS_PASSWORD}@{self.APP_REDIS_HOST}:{self.APP_REDIS_PORT}/{self.APP_REDIS_DB}'
 
 

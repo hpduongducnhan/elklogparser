@@ -11,6 +11,19 @@ class ElkCollectedLog(BaseDBModel):
     log_type = models.CharField(max_length=50, verbose_name="Log Type")
     log_raw = models.JSONField(default=dict, verbose_name="Log Raw")
     log_timestamp = models.FloatField(default=0)
+    value = models.TextField(default="", verbose_name="Value", max_length=10240)
+
+    class Meta:
+        ordering = ["-log_timestamp"]
+        indexes = [
+            models.Index(fields=["collector_code"]),
+            models.Index(fields=["log_type"]),
+            models.Index(fields=["log_id"]),
+            models.Index(fields=["log_timestamp"]),
+            models.Index(fields=['log_type', "log_id"]),
+            models.Index(fields=['log_type', "log_id", 'log_timestamp']),
+            models.Index(fields=["collector_code", 'log_type', "log_id"]),
+        ]
 
     def __str__(self):
         return f"{self.log_id}[{self.collector_code}]"

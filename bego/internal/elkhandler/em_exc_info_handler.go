@@ -51,7 +51,8 @@ func (h *ElkResponseHandler) emExcInfoHandler(msg *elkclient.ElkResponseWithCode
 		// log.Info().Msgf("elkRespHandleEMExcInfo: %v", excInfo)
 		h.pgRepo.CreateOrUpdateElkCollectedLog(
 			msg.CollectorCode, msg.QueryCode,
-			excInfo.LogID, excInfo.Raw, excInfo.Timestamp,
+			excInfo.LogID, excInfo.ExcInfo,
+			excInfo.Raw, excInfo.Timestamp,
 		)
 	} else {
 		// log.Error().Interface("msg", msg).Msgf("elkRespHandleEMExcInfo: Invalid log data")

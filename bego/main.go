@@ -21,7 +21,7 @@ func main() {
 	}
 
 	var runElkWorkerCmd = &cobra.Command{
-		Use:   "run-elk-worker",
+		Use:   "run-monitor",
 		Short: "Run the monitor",
 		Long:  "This command runs the monitor for the application",
 		Run: func(cmd *cobra.Command, args []string) {

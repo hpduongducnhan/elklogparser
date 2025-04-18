@@ -1,8 +1,17 @@
 package elkcollector
 
-import "github.com/rs/zerolog/log"
+import (
+	"sync"
 
-func loadCollectorFromDatabases() {
+	"github.com/rs/zerolog/log"
+)
+
+var reloadMutex sync.Mutex
+
+func loadCollectorFromDatabases() error {
+	reloadMutex.Lock()
+	defer reloadMutex.Unlock()
+
 	if elkCollectors == nil {
 		elkCollectors = make(map[string]*ElkCollector)
 	}
@@ -10,7 +19,7 @@ func loadCollectorFromDatabases() {
 	activeConfigs, err := pgRepo.GetActiveConfigsWithRelations()
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting active configs")
-		return
+		return err
 	} else {
 		log.Info().Msgf("Loaded %d active configs", len(activeConfigs))
 	}
@@ -18,5 +27,5 @@ func loadCollectorFromDatabases() {
 	for _, config := range activeConfigs {
 		elkCollectors[config.Code] = NewElkCollectorFromDbConf(config)
 	}
-	return
+	return nil
 }

@@ -49,7 +49,8 @@ func (h *ElkResponseHandler) emTicketCodeHandler(msg *elkclient.ElkResponseWithC
 	if ticketInfo.IsValid() {
 		h.pgRepo.CreateOrUpdateElkCollectedLog(
 			msg.CollectorCode, msg.QueryCode,
-			ticketInfo.LogID, ticketInfo.Raw, ticketInfo.Timestamp,
+			ticketInfo.LogID, ticketInfo.TicketCode,
+			ticketInfo.Raw, ticketInfo.Timestamp,
 		)
 	} else {
 		return fmt.Errorf("invalid log data")

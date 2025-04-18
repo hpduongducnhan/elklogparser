@@ -20,6 +20,9 @@ func ScrollLogWithCode(
 		log.Panic().Msg("Elasticsearch client is not initialized")
 	}
 	counter := 0
+	defer func() {
+		log.Info().Str("collector", collectorCode).Str("query", queryCode).Int("counter", counter).Msg("scroll result")
+	}()
 
 	// log.Info().Str("code", code).Str("index", elkIndex).Str("query", elkQuery).Msg("scroll log with code")
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
@@ -89,7 +92,7 @@ func ScrollLogWithCode(
 			return err
 		}
 		if len(parsedResp.Hits.Hits) == 0 {
-			log.Info().Int("counter", counter).Msg("scroll done")
+			// log.Info().Int("counter", counter).Msg("scroll done")
 			return nil
 		}
 		// push the parsed hits to the result channel

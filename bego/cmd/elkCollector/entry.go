@@ -1,6 +1,8 @@
 package elkcollector
 
 import (
+	"nhandd/bego/internal/redisclient"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -47,13 +49,20 @@ func RunCollector() {
 	loadCollectorFromDatabases()
 
 	// init handlers
-	for i := range env.ELK_LOG_MAX_HANDLERS {
+	for i := range max(env.ELK_LOG_MAX_HANDLERS, len(elkCollectors)+2) {
 		terminationWg.Add(1)
 		go func() {
 			defer terminationWg.Done()
 			runHandlers(i)
 		}()
 	}
+
+	// init redis subscriber
+	go redisclient.SubscribeChannel(
+		terminationCtx,
+		"elkConfigChange",
+		requestReloadCollectorConfigHandler,
+	)
 
 	for {
 		select {

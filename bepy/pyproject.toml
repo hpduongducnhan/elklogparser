@@ -12,6 +12,8 @@ djangorestframework = "^3.16.0"
 pydantic = "^2.11.1"
 pydantic-settings = "^2.8.1"
 psycopg2 = "^2.9.10"
+django-redis = "^5.4.0"
+redis = {extras = ["hiredis"], version = "^5.2.1"}
 
 
 [build-system]

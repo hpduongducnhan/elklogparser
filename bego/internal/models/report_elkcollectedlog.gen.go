@@ -21,6 +21,7 @@ type ReportElkcollectedlog struct {
 	LogType       string    `gorm:"column:log_type;not null" json:"log_type"`
 	LogRaw        datatypes.JSON    `gorm:"column:log_raw;not null" json:"log_raw"`
 	LogTimestamp  float64   `gorm:"column:log_timestamp;not null" json:"log_timestamp"`
+	Value         string    `gorm:"column:value;not null" json:"value"`
 }
 
 // TableName ReportElkcollectedlog's table name

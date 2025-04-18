@@ -34,7 +34,7 @@ func (b *ElkQueryBuilder) buildWithTimeRange(query string, elkCollector *ElkColl
 	for _, char := range []string{"\t", "\n", ""} {
 		builtQuery = strings.ReplaceAll(builtQuery, char, "")
 	}
-	// log.Info().Str("fromDate", strFromDate).Str("toDate", strToDate).Str("query", query).Msg("Building query with time range")
+	// log.Info().Str("fromDate", strFromDate).Str("toDate", strToDate).Str("builtQuery", builtQuery).Msg("Built query")
 	return builtQuery
 }
 

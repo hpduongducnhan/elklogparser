@@ -1,5 +1,6 @@
 from django.db import models
 from .base import BaseDBModel
+from .utils import request_elk_log_collector_reload_config
 
 
 class ElkCollectorConfig(BaseDBModel):
@@ -54,9 +55,20 @@ class ElkCollectorConfig(BaseDBModel):
         default=True,
         help_text="Is this collector config active?"
     )
+
+    class Meta:
+        ordering = ["-updated_at"]
+        indexes = [
+            models.Index(fields=["code"]),
+            models.Index(fields=["active"]),
+        ]
     
     def __str__(self):
         return f"{self.__class__.__name__}({self.pk})"
+    
+    def save(self, *args, **kwargs):
+        request_elk_log_collector_reload_config()
+        return super().save(*args, **kwargs)
     
 
 class ElkCollectResult(BaseDBModel):
@@ -66,6 +78,21 @@ class ElkCollectResult(BaseDBModel):
         related_name="collect_results",
         help_text="The collector config this result belongs to",
     )
+
+    jid = models.CharField(
+        max_length=128, null=True, blank=True,
+        help_text="Job ID of the collection job"
+    )
+
+    query_from_datetime = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Start time of the query"
+    )
+    query_to_datetime = models.DateTimeField(
+        null=True, blank=True,
+        help_text="End time of the query"
+    )
+
     start_at = models.DateTimeField(
         null=True, blank=True,
         help_text="Start time of the collection"
@@ -74,6 +101,7 @@ class ElkCollectResult(BaseDBModel):
         null=True, blank=True,
         help_text="Finish time of the collection"
     )
+
     success = models.BooleanField(
         default=False,
         help_text="Was the collection successful?"
@@ -86,6 +114,14 @@ class ElkCollectResult(BaseDBModel):
         default=dict,
         help_text="Details of the collection result"
     )
+
+    class Meta:
+        ordering = ["-updated_at"]
+        indexes = [
+            models.Index(fields=["jid"]),
+            models.Index(fields=["success"]),
+            models.Index(fields=["status"]),
+        ]
 
     def __str__(self):
         return f'{self.__class__.__name__}({self.pk})'

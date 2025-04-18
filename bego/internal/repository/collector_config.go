@@ -5,17 +5,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
 )
-
-type DbRepository struct {
-	db *gorm.DB
-}
-
-// Tạo constructor
-func NewDbRepository(db *gorm.DB) *DbRepository {
-	return &DbRepository{db: db}
-}
 
 // Query để lấy tất cả config đang active
 func (r *DbRepository) GetAllActiveConfigs() ([]models.DatasourceElkcollectorconfig, error) {

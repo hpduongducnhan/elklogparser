@@ -124,3 +124,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env.get_redis_url(),  # Match Go's redisAddr
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # "PARSER_CLASS": "redis.connection.HiredisParser",  # Faster parsing[](https://django-redis-cache.readthedocs.io/en/latest/advanced_configuration.html)
+        },
+    }
+}

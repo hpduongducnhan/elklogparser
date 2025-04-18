@@ -11,7 +11,7 @@ import (
 )
 
 func (r *DbRepository) CreateOrUpdateElkCollectedLog(
-	collectorCode, queryCode, logID string,
+	collectorCode, queryCode, logID, value string,
 	logRaw elkclient.ElkInnerHit, logTimestamp time.Time,
 ) (*models.ReportElkcollectedlog, error) {
 	// Prepare the log data
@@ -25,6 +25,7 @@ func (r *DbRepository) CreateOrUpdateElkCollectedLog(
 		LogType:       queryCode, // Giả sử QueryCode tương ứng với LogType
 		LogID:         logID,
 		LogRaw:        logRawJSON,
+		Value:         value,
 		LogTimestamp:  float64(logTimestamp.Unix()), // Chuyển time.Time thành Unix timestamp (seconds)
 		CreatedAt:     time.Now(),
 		UpdatedAt:     time.Now(),
@@ -46,6 +47,7 @@ func (r *DbRepository) CreateOrUpdateElkCollectedLog(
 		updates := map[string]interface{}{
 			"log_raw":       string(logRawJSON),
 			"log_timestamp": tempLog.LogTimestamp,
+			"value":         value,
 			"updated_at":    time.Now(),
 		}
 		if err := r.db.Model(&existing).Updates(updates).Error; err != nil {
