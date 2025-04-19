@@ -39,6 +39,23 @@ func (r *DbRepository) GetActiveConfigsWithRelations() ([]models.DatasourceElkco
 	return configs, nil
 }
 
+func (r *DbRepository) GetActiveConfigByCodes(collectorCodes []string) ([]models.DatasourceElkcollectorconfig, error) {
+	var configs []models.DatasourceElkcollectorconfig
+
+	err := r.db.
+		Preload("ElkQueries").      // Tải các queries liên quan
+		Preload("LogFilters").      // Tải các filters liên quan
+		Preload("ElkConfig").       // Tải các config liên quan
+		Preload("ElkConfig.Proxy"). // Tải ProxyConfig thông qua ElkConfig
+		Where("code IN (?) and active = ?", collectorCodes, true).
+		Find(&configs).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return configs, nil
+}
+
 func (r *DbRepository) UpdateLastRunAt(collectorCode string, lastRunAt time.Time) error {
 	err := r.db.Model(&models.DatasourceElkcollectorconfig{}).
 		Where("code = ?", collectorCode).

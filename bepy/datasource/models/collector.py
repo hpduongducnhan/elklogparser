@@ -67,7 +67,7 @@ class ElkCollectorConfig(BaseDBModel):
         return f"{self.__class__.__name__}({self.pk})"
     
     def save(self, *args, **kwargs):
-        request_elk_log_collector_reload_config()
+        request_elk_log_collector_reload_config([self.code])
         return super().save(*args, **kwargs)
     
 

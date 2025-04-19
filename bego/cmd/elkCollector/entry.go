@@ -46,7 +46,7 @@ func runCollectors() {
 
 func RunCollector() {
 	initialize()
-	loadCollectorFromDatabases()
+	loadCollectorsFromDb()
 
 	// init handlers
 	for i := range max(env.ELK_LOG_MAX_HANDLERS, len(elkCollectors)+2) {
@@ -60,7 +60,7 @@ func RunCollector() {
 	// init redis subscriber
 	go redisclient.SubscribeChannel(
 		terminationCtx,
-		"elkConfigChange",
+		"elkCollectorConfigChange",
 		requestReloadCollectorConfigHandler,
 	)
 

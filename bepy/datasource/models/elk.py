@@ -1,5 +1,6 @@
 from django.db import models
 from .base import BaseDBModel
+from .collector import ElkCollectorConfig
 from .utils import request_elk_log_collector_reload_config
 
 
@@ -20,7 +21,9 @@ class ElkQuery(BaseDBModel):
         return f"{self.name}-{self.index}[{self.code}]"
     
     def save(self, *args, **kwargs):
-        request_elk_log_collector_reload_config()
+        collector_codes = self.collector_configs.values_list("code", flat=True)
+        request_elk_log_collector_reload_config(list(collector_codes))
+
         return super().save(*args, **kwargs)
 
 class ElkConfig(BaseDBModel):
@@ -53,5 +56,6 @@ class ElkConfig(BaseDBModel):
         return f"{self.__class__.__name__}[{self.code}]"
     
     def save(self, *args, **kwargs):
-        request_elk_log_collector_reload_config()
+        collector_codes = self.collector_configs.values_list("code", flat=True)
+        request_elk_log_collector_reload_config(list(collector_codes))
         return super().save(*args, **kwargs)

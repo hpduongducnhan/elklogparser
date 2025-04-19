@@ -8,7 +8,7 @@ import (
 
 var reloadMutex sync.Mutex
 
-func loadCollectorFromDatabases() error {
+func loadCollectorsFromDb() error {
 	reloadMutex.Lock()
 	defer reloadMutex.Unlock()
 
@@ -26,6 +26,24 @@ func loadCollectorFromDatabases() error {
 
 	for _, config := range activeConfigs {
 		elkCollectors[config.Code] = NewElkCollectorFromDbConf(config)
+	}
+	return nil
+}
+
+func reloadCollectorConfigFromDb(collectorCodes []string) error {
+	reloadMutex.Lock()
+	defer reloadMutex.Unlock()
+
+	activeCollectorConf, err := pgRepo.GetActiveConfigByCodes(collectorCodes)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting active config")
+		return err
+	} else {
+		log.Info().Msgf("Reloaded config for collector codes: %v", collectorCodes)
+	}
+	// update collector
+	for _, conf := range activeCollectorConf {
+		elkCollectors[conf.Code] = NewElkCollectorFromDbConf(conf)
 	}
 	return nil
 }

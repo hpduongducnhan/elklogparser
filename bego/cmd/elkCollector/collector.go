@@ -96,7 +96,8 @@ func (e *ElkCollector) updateLastRunAt(atTime time.Time) error {
 		atTime = time.Now()
 	}
 	e.LastRunAt = atTime
-	// log.Info().Interface("lastRunAt", e.LastRunAt).Msg("Update last run at")
+	e.NextRunAt = atTime.Add(time.Duration(e.Interval) * time.Second)
+	log.Info().Interface("lastRunAt", e.LastRunAt).Interface("nextRunAt", e.NextRunAt).Msg("Update last run at")
 	return pgRepo.UpdateLastRunAt(e.Code, e.LastRunAt)
 }
 
